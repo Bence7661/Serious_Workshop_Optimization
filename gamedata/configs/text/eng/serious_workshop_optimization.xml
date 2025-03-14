@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<string_table>
+    <string id="ui_mcm_menu_serious_workshop_optimization">
+        <text>Serious workshop optimization</text>
+    </string>
+
+    <string id="ui_mcm_sld">
+        <text>Serious workshop optimization</text>
+    </string>
+
+    <string id="ui_mcm_sld_text">
+        <text>Serious workshop optimization</text>
+    </string>
+
+    <string id="desc_iterate_interval">
+        <text>Set how frequently the system will add items to your inventory when opening the workshop.</text>
+    </string>
+
+    <string id="ui_mcm_serious_workshop_optimization_workshop_iterate_interval">
+        <text>Iteration interval</text>
+    </string>
+
+    <string id="desc_iterate_size">
+        <text>Set how many items the workshop will add to your inventory at once.</text>
+    </string>
+
+    <string id="ui_mcm_serious_workshop_optimization_workshop_iterate_size">
+        <text>Iteration size</text>
+    </string>
+</string_table>

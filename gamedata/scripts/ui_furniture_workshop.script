@@ -1,7 +1,16 @@
+serious_workshop_opti_mcm_conf = serious_workshop_optimization_mcm.get_config
+
 -- Workshop Logic
 function UseWorkshop(id)
 	local stash_id = GetStash(id)
-	CreateTimeEvent("hf_workshop", "async_get_stash_items_"..id, 0, GetStashItemsAsync, id, stash_id)
+
+	local workshop_opti_config = 
+	{
+		iterationInterval = serious_workshop_opti_mcm_conf("workshop_iterate_interval"),
+		iterationSize = serious_workshop_opti_mcm_conf("workshop_iterate_size")
+	}
+
+	CreateTimeEvent("hf_workshop", "async_get_stash_items_"..id, 0, GetStashItemsAsync, id, stash_id, workshop_opti_config)
 	zzz_workshop_return_items.timeEventsToKill[stash_id] = {eventId = "hf_workshop", actionId = "async_get_stash_items_"..id}
 	CreateTimeEvent("hf_workshop","open_workshop_"..id,0.1,OpenWorkshop)
 end
@@ -199,9 +208,14 @@ function start_dialog(obj_id)
 	--return GUI
 end
 
-function GetStashItemsAsync(workshop_id, stash_id)
+function GetStashItemsAsync(workshop_id, stash_id, config)
 	local items = {}
 	local boxIterations = 0
+	local iterationSize = config.iterationSize
+	local iterationInterval = config.iterationInterval
+
+	printf("iterationSize %s", iterationSize)
+	printf("iterationInterval %s", iterationInterval)
 
 	if stash_id then
 		local stash_obj = get_object_by_id(stash_id)
@@ -210,7 +224,7 @@ function GetStashItemsAsync(workshop_id, stash_id)
 			table.insert(items, obj:id())
 			stash_obj:transfer_item(obj, db.actor)
 			boxIterations = boxIterations + 1
-			if boxIterations >= 70 then
+			if boxIterations >= iterationSize then
 				return true
 			end
 		end, stash_obj)
@@ -232,7 +246,7 @@ function GetStashItemsAsync(workshop_id, stash_id)
 			zzz_workshop_return_items.timeEventsToKill[stash_id] = nil
 		end
 
-		CreateTimeEvent("hf_workshop", "async_get_stash_items_"..workshop_id, 0.3, GetStashItemsAsync, workshop_id, stash_id)
+		CreateTimeEvent("hf_workshop", "async_get_stash_items_"..workshop_id, iterationInterval, GetStashItemsAsync, workshop_id, stash_id, config)
 		zzz_workshop_return_items.timeEventsToKill[stash_id] = {eventId = "hf_workshop", actionId = "async_get_stash_items_"..workshop_id}
 	end
 
