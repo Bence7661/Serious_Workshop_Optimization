@@ -1,7 +1,8 @@
 -- Workshop Logic
 function UseWorkshop(id)
 	local stash_id = GetStash(id)
-	CreateTimeEvent("hf_workshop", "get_stash_items_"..id, 0, GiveStashItemsToActorAsync, id, stash_id)
+	CreateTimeEvent("hf_workshop", "async_get_stash_items_"..id, 0, GetStashItemsAsync, id, stash_id)
+	zzz_workshop_return_items.timeEventsToKill[stash_id] = {eventId = "hf_workshop", actionId = "async_get_stash_items_"..id}
 	CreateTimeEvent("hf_workshop","open_workshop_"..id,0.1,OpenWorkshop)
 end
 
@@ -198,46 +199,47 @@ function start_dialog(obj_id)
 	--return GUI
 end
 
-function GiveStashItemsToActorAsync(workshop_id, stash_id)
-	printf("GiveStashItemsToActorAsync")
+function GetStashItemsAsync(workshop_id, stash_id)
+	local items = {}
+	local boxIterations = 0
 
-	if not zzz_workshop_return_items.inventoryClosing then
-		local items = {}
-		local boxIterations = 0
+	if stash_id then
+		local stash_obj = get_object_by_id(stash_id)
+		if not stash_obj then return end
+		stash_obj:iterate_inventory_box( function(temp, obj)
+			table.insert(items, obj:id())
+			stash_obj:transfer_item(obj, db.actor)
+			boxIterations = boxIterations + 1
+			if boxIterations >= 70 then
+				return true
+			end
+		end, stash_obj)
+	end
 
-		if stash_id then
-			local stash_obj = get_object_by_id(stash_id)
-			if not stash_obj then return end
-			stash_obj:iterate_inventory_box( function(temp, obj)
-				table.insert(items, obj:id())
-				stash_obj:transfer_item(obj, db.actor)
-				printf("boxIteration: %s", boxIterations)
-				boxIterations = boxIterations + 1
-				if boxIterations >= 200 then
-					printf("EXIT BOX ITERATION")
-					return true
-				end
-			end, stash_obj)
+	itemsLength = #items
+	itemsToReturnLength = #zzz_workshop_return_items.item_ids
+
+	for i = 1, itemsLength do
+		zzz_workshop_return_items.item_ids[itemsToReturnLength + i] = items[i]
+	end
+
+	zzz_workshop_return_items.stash_id = stash_id
+
+	if boxIterations ~= 0 then
+		RemoveTimeEvent("hf_workshop", "async_get_stash_items_"..workshop_id)
+
+		if zzz_workshop_return_items.timeEventsToKill[stash_id] then 
+			zzz_workshop_return_items.timeEventsToKill[stash_id] = nil
 		end
 
-		itemsLength = #items
-		itemsToReturnLength = #zzz_workshop_return_items.item_ids
+		CreateTimeEvent("hf_workshop", "async_get_stash_items_"..workshop_id, 0.3, GetStashItemsAsync, workshop_id, stash_id)
+		zzz_workshop_return_items.timeEventsToKill[stash_id] = {eventId = "hf_workshop", actionId = "async_get_stash_items_"..workshop_id}
+	end
 
-		for i = 1, itemsLength do
-			zzz_workshop_return_items.item_ids[itemsToReturnLength + i] = items[i]
+	if boxIterations == 0 then
+		if zzz_workshop_return_items.timeEventsToKill[stash_id] then
+			zzz_workshop_return_items.timeEventsToKill[stash_id] = nil
 		end
-
-		zzz_workshop_return_items.stash_id = stash_id
-
-		if boxIterations ~= 0 then
-			RemoveTimeEvent("hf_workshop", "get_stash_items_"..workshop_id)
-			CreateTimeEvent("hf_workshop", "get_stash_items_"..workshop_id, 1, GiveStashItemsToActorAsync, workshop_id, stash_id)
-		end
-
-		if boxIterations == 0 then
-			return true
-		end
-	else
-		RemoveTimeEvent("hf_workshop", "get_stash_items_"..workshop_id)
+		return true
 	end
 end

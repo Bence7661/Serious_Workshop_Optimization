@@ -1,65 +1,31 @@
 item_ids = {}
 stash_id = nil
-inventoryClosing = false
+timeEventsToKill = {}
 
-function return_items_async()
+function return_items()
     if stash_id == nil then return end
     local stash_obj = get_object_by_id(stash_id)
     if stash_obj == nil then return end
-    inventoryClosing = true
-    CreateTimeEvent("optimized_workshop", "return_stash_items_", 1, returnItemsAsync, stash_obj)
+
+    for i, id in ipairs(item_ids) do
+        local item_obj = get_object_by_id(id)
+        if item_obj then
+            db.actor:transfer_item(item_obj, stash_obj)
+        end
+    end
+
+    item_ids = {}
+    stash_id = nil
 end
 
 ui_workshop_UIWorkshop_Close = ui_workshop.UIWorkshop.Close
 ui_workshop.UIWorkshop.Close = function(self)
 	ui_workshop_UIWorkshop_Close(self)
-    return_items_async()
-end
-
-function returnItemsAsync(stashObject)
-    local res = doPartialTransfer(stashObject)
-
-    local itemTransfers = res[1]
-    local idsToRemove = res[2]
-
-    if itemTransfers ~= 0 then
-		RemoveTimeEvent("optimized_workshop", "return_stash_items_")
-		CreateTimeEvent("optimized_workshop", "return_stash_items_", 1, returnItemsAsync, stashObject)
-	else
-        printf("ItemTransfers was 0")
-    end
-
-	if itemTransfers == 0 or #idsToRemove == 0 then
-        stash_id = nil
-        item_ids = {}
-        inventoryClosing = false
-		return true
-	end
-
-    printf("ItemIDs: %s", #item_ids)
-end
-
-function doPartialTransfer(stashObject)
-    local itemTransfers = 0
-    local idsToRemove = {}
-
-    for i = #item_ids, 1, -1 do
-        local id = item_ids[i]  -- Access the current ID
-        local item_obj = get_object_by_id(id)
-        
-        if item_obj then
-            db.actor:transfer_item(item_obj, stashObject)
-            itemTransfers = itemTransfers + 1
-            
-            -- Remove the current element from item_ids
-            table.remove(item_ids, i)
-        end
     
-        -- If itemTransfers reaches 200, return the results
-        if itemTransfers >= 200 then
-            return {itemTransfers, item_ids}
-        end
+    for _, event in pairs(timeEventsToKill) do
+        RemoveTimeEvent(event.eventId, event.actionId)
     end
 
-    return {itemTransfers, idsToRemove}
+    timeEventsToKill = {}
+    return_items()
 end
