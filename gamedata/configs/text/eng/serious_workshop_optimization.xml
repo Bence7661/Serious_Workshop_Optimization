@@ -12,6 +12,13 @@
         <text>Serious workshop optimization</text>
     </string>
 
+    <string id="desc_general">
+        <text>As the stash of the workshop grows in size the opening of the workshop becomes slower and slower.  
+This mod combats that by not trying to load in the whole stash all at once, but rather do it Asynchronously.  
+The system will load in `N` (depends on MCM config) amount of items from the stash to your inventory then it will let other scripts run for a set amount of time (depends on MCM config)  
+and after this delay it will again load `N` items. Rince and repeat until the whole inventory is loaded.</text>
+    </string>
+
     <string id="desc_iterate_interval">
         <text>Set how frequently the system will add items to your inventory when opening the workshop.</text>
     </string>

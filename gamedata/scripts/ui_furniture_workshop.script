@@ -214,9 +214,6 @@ function GetStashItemsAsync(workshop_id, stash_id, config)
 	local iterationSize = config.iterationSize
 	local iterationInterval = config.iterationInterval
 
-	printf("iterationSize %s", iterationSize)
-	printf("iterationInterval %s", iterationInterval)
-
 	if stash_id then
 		local stash_obj = get_object_by_id(stash_id)
 		if not stash_obj then return end
