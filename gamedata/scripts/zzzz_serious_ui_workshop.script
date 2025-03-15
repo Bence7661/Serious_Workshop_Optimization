@@ -36,7 +36,6 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 		db.actor:iterate_inventory(search,nil)
 		
 		--SERIOUS OPTI
-		FileLogger.log_to_file("Serious patch")
 		if self.stashId then
 			local stash_obj = get_object_by_id(self.stashId)
 			stash_obj:iterate_inventory_box( function(temp, item)
