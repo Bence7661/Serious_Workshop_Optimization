@@ -1,3 +1,7 @@
+--[[
+	SERIOUS: This is a modified version of: utils_item.collect_amount
+--]]
+
 function CollectAmountFromStashAndActor(stash, actor, section, mode)
 	-- mode 0: count item as 1
 	-- mode 1: can count item uses, but not ammo count
