@@ -1,3 +1,7 @@
+--SERIOUS This script overwrites a monkey patch.
+-- Monkey patch overwrite: 141- Fixed Crafting with Multi-Use Items - thisisntmysteamid
+-- File: zzz_timsi_ui_workshop
+
 UpdateItem = ui_workshop.UIWorkshopCraft.UpdateItem
 SetTip = ui_workshop.SetTip
 
