@@ -8,6 +8,13 @@
 	Repair/Upgrade/Craft DIY interface
 --]]
 
+--[[
+	Optimized by SERIOUS
+	2025/03/15
+	Last edit: 2025/03/15
+	Workshop UI
+--]]
+
 
 workshop_toolkits = {
 	"itm_basickit",
@@ -586,7 +593,7 @@ function UIWorkshopRepair:ListPartScheme()
 			local part_name = ui_item.get_sec_name(self.parts[i].sec) or ""
 			local con = utils_item.get_cond_static(self.parts[i].con)
 			local clr = utils_xml.get_color_con(con)
-			local obj_part = nil -- Maybe nil is not good. Will test SERIOUS
+			local obj_part = nil
 
 			--SERIOUS OPTI
 			--This is shit. The whole stash will be iterated 6 times. Well I guess player inv is iterated too.
@@ -653,8 +660,6 @@ function UIWorkshopRepair:ListSpareParts()
 	end)
 	
 	--SERIOUS OPTI  
-	--For part replacing. Half done. If I have no parts in player inv then I can't click the part of the item.
-	--The actual listing works and loads both player and stash inv.
 	local stash = nil
 	if self.stashId then
 		stash = get_object_by_id(self.stashId)
@@ -781,7 +786,6 @@ function UIWorkshopRepair:UpdateToolkits(num)
 		-- SERIOUS OPTI
 		if stashId then
 			local stash_obj = get_object_by_id(stashId)
-
 			self.toolkit_inv = serious_workshop_utils.CollectAmountFromStashAndActor(stash_obj, db.actor, self.toolkit)
 		else
 			self.toolkit_inv = utils_item.collect_amount(db.actor, self.toolkit)
@@ -1203,6 +1207,21 @@ function UIWorkshopUpgrade:LoadInventory()
 			inv[size_t] = obj
 		end
 	end)
+
+	--SERIOUS OPTI
+	local stashId = self.owner.stashId or self.stashId
+	if stashId then
+		local stash_obj = get_object_by_id(stashId)
+		stash_obj:iterate_inventory_box(function(owner,obj)
+			local sec = obj:section()
+			local upgr_list = ini_sys:r_string_ex(sec,"upgrades")
+			if upgr_list and (upgr_list ~= "") then
+				size_t = size_t + 1
+				inv[size_t] = obj
+			end
+		end)
+	end
+	--SERIOUS OPTI
 	
 	self.CC:Reinit(inv)
 	
@@ -1422,6 +1441,23 @@ function UIWorkshopUpgrade:CollectUpgradekits(sec_add)
 			--printf("UIWorkshopUpgrade:CollectUpgradekits | tools[%s][%s] = %s", sec, obj:id(), uses)
 		end
 	end)
+
+	--SERIOUS OPTI
+	local stashId = self.owner.stashId or self.stashId
+	if stashId then
+		local stash_obj = get_object_by_id(stashId)
+		stash_obj:iterate_inventory_box(function(tmp, obj)
+			local sec = obj:section()
+			if IsItem("upgrade",sec) or (sec == sec_add) then
+				if (not t[sec]) then t[sec] = {} end
+				
+				local uses = utils_item.get_item_remaining_uses(obj) or 1
+				t[sec][obj:id()] = uses
+			end
+		end)
+	end
+	--SERIOUS OPTI
+
 	return t
 end
 
