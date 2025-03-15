@@ -35,12 +35,14 @@ local clr_list = {
 
 -------------------------------------------------------------------
 GUI = nil -- instance, don't touch
-function get_workshop_ui(...)
+function get_workshop_ui(stashId, ...)
 	if (not GUI) then
 		GUI = UIWorkshop()
+		GUI.stashId = stashId
 	end
 	
 	if (GUI) and (not GUI:IsShown()) then
+		GUI.stashId = stashId
 		GUI:Reset(...)
 		GUI:ShowDialog(true)
 		Register_UI("UIWorkshop","ui_workshop")
@@ -145,44 +147,7 @@ function UIWorkshop:InitCallBacks()
 end
 
 function UIWorkshop:Reset(owner, mechanic, toolkits_workshop, dbg)
-	self.dbg = dbg and true or false
-	self.owner = owner
-	self.mechanic = mechanic
-	self.toolkits_workshop = toolkits_workshop or {}
-	self.toolkits_state = {}
-	for i=1,6 do
-		if self.toolkits_workshop[i] or db.actor:object(workshop_toolkits[i]) then
-			self.toolkits_state[i] = true
-		else
-			self.toolkits_state[i] = false
-		end
-	end
-
-	if db.actor:object(workshop_toolkits[6]) then
-		if not db.actor:object(workshop_toolkits[1]) then
-			self.toolkits_state[6] = true
-			self.toolkits_state[1] = false
-		end
-	end
-	
-
-	-- Switch to state tab
-	self:OnButton_state()
-
-	-- Background depends on UI owner
-	if device():is_paused() then
-		self.background:Show(true)
-	else
-		self.background:Show(false)
-	end
-
-	if self.owner.item_info then
-		self.owner.item_info:Update()
-	end
-	
-	if self.owner.upgr_info then
-		self.owner.upgr_info:Update()
-	end	
+	--MONKEY PATCHED
 end
 
 function UIWorkshop:OnButton_state()
@@ -231,6 +196,7 @@ function UIWorkshop:Close()
 	self.dlg_upgrade:Show		(false)
 	self.dlg_craft:Show			(false)
 	self.dlg_craft.stashId		= nil
+	self.stashId				= nil
 	
 	self:HideDialog()
 	self:Show(false)
@@ -549,6 +515,21 @@ function UIWorkshopRepair:ListInventory()
 			inv[size_t] = obj
 		end
 	end)
+
+
+	--SERIOUS OPTI
+	if self.owner.stashId then
+		local stash_obj = get_object_by_id(self.owner.stashId)
+		stash_obj:iterate_inventory_box( function(temp, obj)
+			local sec = obj:section()
+			sec = ini_sys:r_string_ex(sec,"parent_section") or sec -- for weapons with scopes
+			if itms_manager.ini_parts:r_string_ex("con_parts_list",sec) then
+				size_t = size_t + 1
+				inv[size_t] = obj
+			end
+		end)
+	end
+	--SERIOUS OPTI
 	
 	self.CC["inventory"]:Reinit(inv)
 
@@ -751,6 +732,19 @@ function UIWorkshopRepair:UpdateToolkits(num)
 			break
 		end
 	end
+
+	if not self.toolkit and self.owner.stashId then
+		local stash_obj = get_object_by_id(self.stashId)
+
+		stash_obj:iterate_inventory_box( function(temp, item)
+			if item[repair_type] then
+				self.toolkit =item
+				print_ws("- UIWorkshopRepair:UpdateToolkits(%s) | picked proper tookit [%s] to use for [%s]", num, k, main_sec)
+				return true
+			end
+		end)
+	end
+
 	if self.toolkit then
 		self.toolkit_inv = utils_item.collect_amount(db.actor, self.toolkit)
 		for _,uses in pairs(self.toolkit_inv) do
@@ -1517,7 +1511,6 @@ function UIWorkshopCraft:__init(xml, owner, x, y) super(xml, owner, x, y)
 	self.owner = owner
 	self.xml = xml
 	
-	self.stashId = nil
 	self.last_index = nil -- little trick to get clicked item from inv
 	self.last_type = nil
 	self.selected_index = nil

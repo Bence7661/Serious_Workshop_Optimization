@@ -80,8 +80,7 @@ function OpenWorkshop(stashId)
 	if (workshop_ui_ref) then
 		workshop_ui_ref:ShowDialog(true)
 		workshop_ui_ref.dlg_craft.stashId = stashId
-		FileLogger.log_to_file("workshop_ui_ref.dlg_craft.stashId %s", workshop_ui_ref.dlg_craft.stashId)
-		
+		workshop_ui_ref.stashId = stashId
 	end
 	return true
 end
@@ -199,53 +198,3 @@ function start_dialog(obj_id)
 	GUI:TestAndShow(obj_id)
 	--return GUI
 end
-
--- SERIOUS: CLEAN THIS UP
--- function GetStashItemsAsync(workshop_id, stash_id, config)
--- 	local items = {}
--- 	local boxIterations = 0
--- 	local iterationSize = config.iterationSize
--- 	local iterationInterval = config.iterationInterval
-
--- 	printf("STASH ID %s", stash_id) -- 4492
-
--- 	if stash_id then
--- 		local stash_obj = get_object_by_id(stash_id)
--- 		if not stash_obj then return end
--- 		stash_obj:iterate_inventory_box( function(temp, obj)
--- 			table.insert(items, obj:id())
--- 			stash_obj:transfer_item(obj, db.actor)
--- 			boxIterations = boxIterations + 1
--- 			if boxIterations >= iterationSize then
--- 				return true
--- 			end
--- 		end, stash_obj)
--- 	end
-
--- 	itemsLength = #items
--- 	itemsToReturnLength = #zzz_workshop_return_items.item_ids
-
--- 	for i = 1, itemsLength do
--- 		zzz_workshop_return_items.item_ids[itemsToReturnLength + i] = items[i]
--- 	end
-
--- 	zzz_workshop_return_items.stash_id = stash_id
-
--- 	if boxIterations ~= 0 then
--- 		RemoveTimeEvent("hf_workshop", "async_get_stash_items_"..workshop_id)
-
--- 		if zzz_workshop_return_items.timeEventsToKill[stash_id] then 
--- 			zzz_workshop_return_items.timeEventsToKill[stash_id] = nil
--- 		end
-
--- 		CreateTimeEvent("hf_workshop", "async_get_stash_items_"..workshop_id, iterationInterval, GetStashItemsAsync, workshop_id, stash_id, config)
--- 		zzz_workshop_return_items.timeEventsToKill[stash_id] = {eventId = "hf_workshop", actionId = "async_get_stash_items_"..workshop_id}
--- 	end
-
--- 	if boxIterations == 0 then
--- 		if zzz_workshop_return_items.timeEventsToKill[stash_id] then
--- 			zzz_workshop_return_items.timeEventsToKill[stash_id] = nil
--- 		end
--- 		return true
--- 	end
--- end
