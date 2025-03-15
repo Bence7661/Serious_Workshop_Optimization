@@ -36,14 +36,10 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 		db.actor:iterate_inventory(search,nil)
 		
 		--SERIOUS OPTI
-		if self.stashId then
-			local stash_obj = get_object_by_id(self.stashId)
-			stash_obj:iterate_inventory_box( function(temp, item)
-				if (item:section() == sec) and (not parts_id[item:id()]) then
-					local cnt = IsItem("multiuse",nil,item) and item:get_remaining_uses() or 1
-					parts_id[item:id()] = cnt
-				end
-			end)
+		local stashId = self.owner.stashId or self.stashId
+		if stashId  then
+			local stash_obj = get_object_by_id(stashId)
+			stash_obj:iterate_inventory_box(search)
 		end
 		--SERIOUS OPTI
 

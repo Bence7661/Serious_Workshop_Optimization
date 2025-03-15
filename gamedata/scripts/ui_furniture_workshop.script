@@ -80,6 +80,9 @@ function OpenWorkshop(stashId)
 	if (workshop_ui_ref) then
 		workshop_ui_ref:ShowDialog(true)
 		workshop_ui_ref.dlg_craft.stashId = stashId
+		workshop_ui_ref.dlg_upgrade.stashId = stashId
+		workshop_ui_ref.dlg_state.stashId = stashId
+		workshop_ui_ref.dlg_repair.stashId = stashId
 		workshop_ui_ref.stashId = stashId
 	end
 	return true
