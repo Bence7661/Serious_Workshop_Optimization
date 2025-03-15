@@ -13,17 +13,19 @@ ui_workshop.UIWorkshop.Reset = function(self,owner, mechanic, toolkits_workshop,
 	self.toolkits_state = {}
 
 	--SERIOUS OPTI
-	local stash = nil
-	if self.stashId then
-		stash = get_object_by_id(self.stashId)
+	local stashId = self.stashId or self.owner.stashId
+	if stashId then
+		local stash = get_object_by_id(stashId)
 
-		stash:iterate_inventory_box( function(temp, item)
-			for i, toolkitSect in pairs(workshop_toolkits) do
-				if item:section() == toolkitSect then
-					self.toolkits_state[i] = true
+		if stash then
+			stash:iterate_inventory_box( function(temp, item)
+				for i, toolkitSect in pairs(workshop_toolkits) do
+					if item:section() == toolkitSect then
+						self.toolkits_state[i] = true
+					end
 				end
-			end
-		end)
+			end)
+		end
 	end
 	--SERIOUS OPTI
 

@@ -42,7 +42,9 @@ local clr_list = {
 
 -------------------------------------------------------------------
 GUI = nil -- instance, don't touch
-function get_workshop_ui(stashId, ...)
+function get_workshop_ui(...)
+	local args = { ... }
+    local stashId = args[5] -- stashId
 	if (not GUI) then
 		GUI = UIWorkshop()
 		GUI.stashId = stashId
@@ -527,14 +529,17 @@ function UIWorkshopRepair:ListInventory()
 	local stashId = self.owner.stashId or self.stashId
 	if stashId then
 		local stash_obj = get_object_by_id(stashId)
-		stash_obj:iterate_inventory_box( function(temp, obj)
-			local sec = obj:section()
-			sec = ini_sys:r_string_ex(sec,"parent_section") or sec -- for weapons with scopes
-			if itms_manager.ini_parts:r_string_ex("con_parts_list",sec) then
-				size_t = size_t + 1
-				inv[size_t] = obj
-			end
-		end)
+
+		if stash_obj then
+			stash_obj:iterate_inventory_box( function(temp, obj)
+				local sec = obj:section()
+				sec = ini_sys:r_string_ex(sec,"parent_section") or sec -- for weapons with scopes
+				if itms_manager.ini_parts:r_string_ex("con_parts_list",sec) then
+					size_t = size_t + 1
+					inv[size_t] = obj
+				end
+			end)
+		end
 	end
 	--SERIOUS OPTI
 	
@@ -786,7 +791,12 @@ function UIWorkshopRepair:UpdateToolkits(num)
 		-- SERIOUS OPTI
 		if stashId then
 			local stash_obj = get_object_by_id(stashId)
-			self.toolkit_inv = serious_workshop_utils.CollectAmountFromStashAndActor(stash_obj, db.actor, self.toolkit)
+
+			if stash_obj then
+				self.toolkit_inv = serious_workshop_utils.CollectAmountFromStashAndActor(stash_obj, db.actor, self.toolkit)
+			else
+				self.toolkit_inv = utils_item.collect_amount(db.actor, self.toolkit)
+			end
 		else
 			self.toolkit_inv = utils_item.collect_amount(db.actor, self.toolkit)
 		end
@@ -1212,14 +1222,17 @@ function UIWorkshopUpgrade:LoadInventory()
 	local stashId = self.owner.stashId or self.stashId
 	if stashId then
 		local stash_obj = get_object_by_id(stashId)
-		stash_obj:iterate_inventory_box(function(owner,obj)
-			local sec = obj:section()
-			local upgr_list = ini_sys:r_string_ex(sec,"upgrades")
-			if upgr_list and (upgr_list ~= "") then
-				size_t = size_t + 1
-				inv[size_t] = obj
-			end
-		end)
+
+		if stash_obj then
+			stash_obj:iterate_inventory_box(function(owner,obj)
+				local sec = obj:section()
+				local upgr_list = ini_sys:r_string_ex(sec,"upgrades")
+				if upgr_list and (upgr_list ~= "") then
+					size_t = size_t + 1
+					inv[size_t] = obj
+				end
+			end)
+		end
 	end
 	--SERIOUS OPTI
 	
@@ -1446,15 +1459,18 @@ function UIWorkshopUpgrade:CollectUpgradekits(sec_add)
 	local stashId = self.owner.stashId or self.stashId
 	if stashId then
 		local stash_obj = get_object_by_id(stashId)
-		stash_obj:iterate_inventory_box(function(tmp, obj)
-			local sec = obj:section()
-			if IsItem("upgrade",sec) or (sec == sec_add) then
-				if (not t[sec]) then t[sec] = {} end
-				
-				local uses = utils_item.get_item_remaining_uses(obj) or 1
-				t[sec][obj:id()] = uses
-			end
-		end)
+
+		if stash_obj then
+			stash_obj:iterate_inventory_box(function(tmp, obj)
+				local sec = obj:section()
+				if IsItem("upgrade",sec) or (sec == sec_add) then
+					if (not t[sec]) then t[sec] = {} end
+					
+					local uses = utils_item.get_item_remaining_uses(obj) or 1
+					t[sec][obj:id()] = uses
+				end
+			end)
+		end
 	end
 	--SERIOUS OPTI
 

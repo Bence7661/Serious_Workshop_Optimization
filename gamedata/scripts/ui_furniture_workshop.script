@@ -76,7 +76,7 @@ function GiveStashItemsToActor(workshop_id, stash_id)
 end
 
 function OpenWorkshop(stashId)
-	workshop_ui_ref = ui_workshop.get_workshop_ui(stashId, nil, nil, {false,false,false,false,false}, false)
+	workshop_ui_ref = ui_workshop.get_workshop_ui(nil, nil, {false,false,false,false,false}, false, stashId)
 	if (workshop_ui_ref) then
 		workshop_ui_ref:ShowDialog(true)
 		workshop_ui_ref.dlg_craft.stashId = stashId
