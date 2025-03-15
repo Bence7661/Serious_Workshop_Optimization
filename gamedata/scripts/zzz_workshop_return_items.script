@@ -21,11 +21,10 @@ end
 ui_workshop_UIWorkshop_Close = ui_workshop.UIWorkshop.Close
 ui_workshop.UIWorkshop.Close = function(self)
 	ui_workshop_UIWorkshop_Close(self)
-    
-    for _, event in pairs(timeEventsToKill) do
-        RemoveTimeEvent(event.eventId, event.actionId)
-    end
+    -- for _, event in pairs(timeEventsToKill) do
+    --     RemoveTimeEvent(event.eventId, event.actionId)
+    -- end
 
-    timeEventsToKill = {}
-    return_items()
+    -- timeEventsToKill = {}
+    -- return_items()
 end
