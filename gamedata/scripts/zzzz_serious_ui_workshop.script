@@ -40,7 +40,7 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 		db.actor:iterate_inventory(search,nil)
 		
 		--SERIOUS OPTI
-		local stashId = self.owner.stashId or self.stashId
+		local stashId = self.stashId or (self.owner and self.owner.stashId)
 		if stashId  then
 			local stash_obj = get_object_by_id(stashId)
 			stash_obj:iterate_inventory_box(search)

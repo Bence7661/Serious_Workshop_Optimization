@@ -526,12 +526,12 @@ function UIWorkshopRepair:ListInventory()
 	end)
 
 	--SERIOUS OPTI
-	local stashId = self.owner.stashId or self.stashId
+	local stashId = self.stashId or (self.owner and self.owner.stashId)
 	if stashId then
 		local stash_obj = get_object_by_id(stashId)
 
 		if stash_obj then
-			stash_obj:iterate_inventory_box( function(temp, obj)
+			stash_obj:iterate_inventory_box(function(_, obj)
 				local sec = obj:section()
 				sec = ini_sys:r_string_ex(sec,"parent_section") or sec -- for weapons with scopes
 				if itms_manager.ini_parts:r_string_ex("con_parts_list",sec) then
@@ -587,7 +587,7 @@ function UIWorkshopRepair:ListPartScheme()
 		self.parts[i].con = parts_con[parts[i]]
 	end
 
-	local stashId = self.owner.stashId or self.stashId
+	local stashId = self.stashId or (self.owner and self.owner.stashId)
 	local stash_obj = nil
 	if stashId then
 		stash_obj = get_object_by_id(stashId)
@@ -603,7 +603,7 @@ function UIWorkshopRepair:ListPartScheme()
 			--SERIOUS OPTI
 			--This is shit. The whole stash will be iterated 6 times. Well I guess player inv is iterated too.
 			if stash_obj then
-				stash_obj:iterate_inventory_box( function(temp, obj)
+				stash_obj:iterate_inventory_box(function(_, obj)
 					local sec = obj:section()
 					
 					if sec == self.parts[i].sec then
@@ -766,7 +766,7 @@ function UIWorkshopRepair:ReplacePart()
 end
 
 function UIWorkshopRepair:UpdateToolkits(num)
-	local stashId = self.owner.stashId or self.stashId
+	local stashId = self.stashId or (self.owner and self.owner.stashId)
 
 	local obj = self.CC["inventory"]:GetCell_Selected(true)
 	if (not obj) then
@@ -1219,12 +1219,12 @@ function UIWorkshopUpgrade:LoadInventory()
 	end)
 
 	--SERIOUS OPTI
-	local stashId = self.owner.stashId or self.stashId
+	local stashId = self.stashId or (self.owner and self.owner.stashId)
 	if stashId then
 		local stash_obj = get_object_by_id(stashId)
 
 		if stash_obj then
-			stash_obj:iterate_inventory_box(function(owner,obj)
+			stash_obj:iterate_inventory_box(function(_,obj)
 				local sec = obj:section()
 				local upgr_list = ini_sys:r_string_ex(sec,"upgrades")
 				if upgr_list and (upgr_list ~= "") then
@@ -1456,12 +1456,12 @@ function UIWorkshopUpgrade:CollectUpgradekits(sec_add)
 	end)
 
 	--SERIOUS OPTI
-	local stashId = self.owner.stashId or self.stashId
+	local stashId = self.stashId or (self.owner and self.owner.stashId)
 	if stashId then
 		local stash_obj = get_object_by_id(stashId)
 
 		if stash_obj then
-			stash_obj:iterate_inventory_box(function(tmp, obj)
+			stash_obj:iterate_inventory_box(function(_, obj)
 				local sec = obj:section()
 				if IsItem("upgrade",sec) or (sec == sec_add) then
 					if (not t[sec]) then t[sec] = {} end
