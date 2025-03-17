@@ -1,3 +1,7 @@
+--SERIOUS This script overwrites a monkey patch.
+-- Monkey patch overwrite: 337- QoL Bundle - Utjan
+-- File: craft_use_low_cond.script
+
 function on_game_start()
     base_craft = ui_workshop.UIWorkshopCraft.Craft
     function ui_workshop.UIWorkshopCraft:Craft()
@@ -23,7 +27,7 @@ function on_game_start()
                     end
                 end
                 db.actor:iterate_inventory(search,nil)
-                
+
                 --SERIOUS OPTI
                 local stashId = self.stashId or (self.owner and self.owner.stashId)
 
