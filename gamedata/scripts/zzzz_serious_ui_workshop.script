@@ -20,7 +20,6 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 	local counter = 0
 	local name = ui_item.get_sec_name(sec)
 	
-	
 	if (not result) then
 		-- Reset
 		self.craft_item[n] = {}
@@ -43,7 +42,7 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 		local stashId = self.stashId or (self.owner and self.owner.stashId)
 		if stashId  then
 			local stash_obj = get_object_by_id(stashId)
-			stash_obj:iterate_inventory_box(search)
+			stash_obj:iterate_inventory_box(search, nil)
 		end
 		--SERIOUS OPTI
 
