@@ -1893,6 +1893,7 @@ function UIWorkshopCraft:On_CC_Mouse1(cont, idx)
 	self.craft_item_r = nil
 	self.craft_allow_r = nil
 	self.selected_index = self.last_index
+	self.multiRelease = {}
 
 	for i=1,4 do
 		local sh = false

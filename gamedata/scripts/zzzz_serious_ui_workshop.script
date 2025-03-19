@@ -22,6 +22,11 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 	
 	if (not result) then
 		-- Reset
+		if self.resetMultiRelease then
+			self.resetMultiRelease = false
+			self.multiRelease = {}
+		end
+
 		self.craft_item[n] = {}
 		self.craft_item_remain[n] = {}
 		self.craft_allow[n] = false
@@ -57,16 +62,76 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 		if IsItem("ammo",sec) then -- ammo
 			local full_ammo = 0
 			local full_ammo_txt = 0
+
+			--This is for when there's a partial amount of components in stash and in player inv.
+			--We check if we find similar item in parts_id.
+
+			local partialComponent = {
+				-- ["sect"] =
+				-- {
+				-- 	id = 0,
+				-- 	size = 0,
+				-- 	boxSize = 0,
+				-- 	findSimilar = false
+				-- }
+			}
+
+			--Need to reset multiRelease: In the "if result" part of code we assign a bool to true
+			--If that bool is true when the IsItem("ammo", sec) returns true then we clear multiRelease.
+
+			--If we find similar in parts_id we register both id for release later.
+			--After release we will give the player a new item with size = id1.size + id2.size - recipe required size
+			--Also. I need to clean partialComponent and multiRelease each time the code enters UpdateItem.
+			--Maybe even when the workshop closes just to be safe.
+			--Also. There's never going to be a need for a 3rd Id (As long as we search only 2 containers: bag, stash)
+			--If we can complete recipe like this: 2partial + 1full. We release the full ones with parts[id]
+			--then we release partial ones with the custom "complex craft" code.
+			--I could just increase "amount" when "complex crafting", but that could lead to the recipe required amount...
+			--growing indefinetly if the player keeps clicking on the item.
+
+			-- multiRelease = {
+			-- 	{ 
+			-- 		id1 = 0,
+			-- 		id2 = 0,
+			-- 		section = "", --This will store what I need to create
+			-- 		newItemSize = 0
+			-- 	}
+			-- }
+
 			for id,_ in pairs(parts_id) do
 				local ammo = level.object_by_id(id)
 				if ammo then
 					local size = ammo:ammo_get_count()
 					local box_size = ammo:ammo_box_size()
+					local similar = partialComponent[sec]
+					
 					full_ammo_txt = full_ammo_txt + size
+					
 					if (size >= box_size) then
 						full_ammo = full_ammo + 1
 					else
-						parts_id[id] = nil
+						if not similar then
+							partialComponent[sec] = {
+								id = id,
+								size = size,
+								boxSize = box_size,
+								findSimilar = true
+							}
+						elseif similar and similar.findSimilar and size + similar.size >= box_size then
+							--I think this handles if we need more than 1 full box.
+							full_ammo = full_ammo + 1
+							similar.findSimilar = false
+
+							self.multiRelease[#self.multiRelease + 1] = 
+							{
+								id1 = id,
+								id2 = similar.id,
+								section = sec,
+								newItemSize = size + similar.size - box_size --Later check if it's at least 1
+							}
+						end
+
+						parts_id[id] = nil --This is only needed for release? Will need checking. If it is then we're good.
 					end
 					if (full_ammo >= amount) then
 						self.itm_num[n]:SetTextColor(GetARGB(200, 50, 255, 50))
@@ -113,6 +178,8 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 	else
 		local stop = false
 		local toolkit_name = ui_item.get_sec_name(toolkit_sec)
+
+		self.resetMultiRelease = true
 		
 		for i=1,4 do
 			if self.craft_allow[i] == false then
