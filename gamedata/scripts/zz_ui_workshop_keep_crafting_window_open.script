@@ -1,4 +1,6 @@
---G.A.M.M.A. Artefacts Reinvention
+--SERIOUS This script overwrites a monkey patch.
+-- Monkey patch overwrite: G.A.M.M.A. Artefacts Reinvention
+-- File zz_ui_workshop_keep_crafting_window_open.script
 
 local SetTip = ui_workshop.SetTip
 local AdjustCon = ui_workshop.AdjustCon
@@ -95,14 +97,19 @@ ui_workshop.UIWorkshopCraft.Craft = function(self)
 		end
 	end
 
-	if self.multiRelease and #self.multiRelease > 1 then
-		for _, mrInfo in pairs(self.multiRelease) do
-			alife_release_id(mrInfo.id1)
-			alife_release_id(mrInfo.id2)
+	if self.complexCraft and #self.complexCraft > 1 then
+		for _, ccInfo in pairs(self.complexCraft) do
+			alife_release_id(ccInfo.id1)
+			alife_release_id(ccInfo.id2)
 
-			if mrInfo.newItemSize >= 1 then
-				--We should spawn the remaining stuff where more of the materials came from
-				alife_create_item(mrInfo.section, db.actor, {ammo = mrInfo.newItemSize})
+			if ccInfo.newItemSize >= 1 then
+				local stashId = self.stashId or (self.owner and self.owner.stashId)
+				if stashId then
+					local stash_obj = get_object_by_id(stashId)
+					alife_create_item(ccInfo.section, stash_obj, {ammo = ccInfo.newItemSize})
+				else
+					alife_create_item(ccInfo.section, db.actor, {ammo = ccInfo.newItemSize})
+				end
 			end
 		end
 	end

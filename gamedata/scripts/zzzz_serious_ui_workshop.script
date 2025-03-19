@@ -19,12 +19,12 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 	local parts_id = {}
 	local counter = 0
 	local name = ui_item.get_sec_name(sec)
-	
+
 	if (not result) then
 		-- Reset
-		if self.resetMultiRelease then
-			self.resetMultiRelease = false
-			self.multiRelease = {}
+		if self.resetcomplexCraft then
+			self.resetcomplexCraft = false
+			self.complexCraft = {}
 		end
 
 		self.craft_item[n] = {}
@@ -76,12 +76,12 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 				-- }
 			}
 
-			--Need to reset multiRelease: In the "if result" part of code we assign a bool to true
-			--If that bool is true when the IsItem("ammo", sec) returns true then we clear multiRelease.
+			--Need to reset complexCraft: In the "if result" part of code we assign a bool to true
+			--If that bool is true when the IsItem("ammo", sec) returns true then we clear complexCraft.
 
 			--If we find similar in parts_id we register both id for release later.
 			--After release we will give the player a new item with size = id1.size + id2.size - recipe required size
-			--Also. I need to clean partialComponent and multiRelease each time the code enters UpdateItem.
+			--Also. I need to clean partialComponent and complexCraft each time the code enters UpdateItem.
 			--Maybe even when the workshop closes just to be safe.
 			--Also. There's never going to be a need for a 3rd Id (As long as we search only 2 containers: bag, stash)
 			--If we can complete recipe like this: 2partial + 1full. We release the full ones with parts[id]
@@ -89,7 +89,7 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 			--I could just increase "amount" when "complex crafting", but that could lead to the recipe required amount...
 			--growing indefinetly if the player keeps clicking on the item.
 
-			-- multiRelease = {
+			-- complexCraft = {
 			-- 	{ 
 			-- 		id1 = 0,
 			-- 		id2 = 0,
@@ -122,7 +122,7 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 							full_ammo = full_ammo + 1
 							similar.findSimilar = false
 
-							self.multiRelease[#self.multiRelease + 1] = 
+							self.complexCraft[#self.complexCraft + 1] = 
 							{
 								id1 = id,
 								id2 = similar.id,
@@ -179,7 +179,7 @@ function ui_workshop.UIWorkshopCraft:UpdateItem (n, sec, amount, result, toolkit
 		local stop = false
 		local toolkit_name = ui_item.get_sec_name(toolkit_sec)
 
-		self.resetMultiRelease = true
+		self.resetcomplexCraft = true
 		
 		for i=1,4 do
 			if self.craft_allow[i] == false then
