@@ -567,7 +567,7 @@ function UIWorkshopRepair:ListPartScheme()
 	
 	--self.dot:Show(true)
 	--self.line_r:Show(true)
-	self.itm_b_r:Show(true)
+	
 	
 	itms_manager.play_item_sound(obj)
 	
@@ -575,8 +575,16 @@ function UIWorkshopRepair:ListPartScheme()
 	sec = ini_sys:r_string_ex(sec,"parent_section") or sec -- for weapons with scopes
 	local con = math.ceil(100*(obj:condition()))
 	utils_xml.set_upgr_icon(obj, sec, self.itm_ico_r, self.itm_ico_temp_r)
-	self.itm_con_r:SetText(con .. "%")
 	
+	if IsWeapon(obj) then
+		self.itm_con_r:Show(false)
+		self.itm_b_r:Show(false)
+	else
+		self.itm_con_r:Show(true)
+		self.itm_b_r:Show(true)
+		self.itm_con_r:SetText(con .. "%")
+	end
+
 	-- Prepare toolkit
 	local toolkits_num = self:UpdateToolkits(0)
 	
